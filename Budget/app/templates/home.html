@@ -1,18 +1,106 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Budget</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{% static "styles.css" %}">
-    </head>
-    <body>
-        <header>
-            <h1>Budget Machine</h1>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Budget</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static "startingPage.css" %}">
+    <link rel="stylesheet" href="{% static "homeButtons.css" %}">
+    <link rel="stylesheet" href="{% static "registrationPage.css" %}">
+    <link rel="stylesheet" href="{% static "registrationButtons.css" %}">
+    <style>
+        .budget-entry {
+            margin: 0px 600px;
+            padding: 20px;
+            overflow: hidden;
+            border: 2px solid #000;
+            background: linear-gradient(145deg, #e2e2e2, #c4c4c4);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            width: auto;
+            border-radius: 50px;
+            top: 20px;
+        }
+        .budget-entry p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}" style="text-decoration: none">Home</a></li>
+            <li><a href="{% url 'registration' %}" style="text-decoration: none">Register</a></li>
+        </ul>
+    </nav>
+    <header>
+        <h1>Budget Machine</h1>
+    </header>
+
+    <section id="userInfo">
+        <h3>Enter your information down below</h3>
+        <form id="budgetForm">
+            <label for="category">Category:</label>
+            <input type="text" id="category" name="category" required><br><br>
+            
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" required><br><br>
+
+            <label for="emoji">Emoji:</label>
+            <select id="emoji" name="emoji" required>
+                <option value="🏠">🏠 Home</option>
+                <option value="🍔">🍔 Food</option>
+                <option value="🚗">🚗 Transport</option>
+                <option value="🎓">🎓 Education</option>
+                <option value="💡">💡 Utilities</option>
+                <option value="💊">💊 Healthcare</option>
+                <option value="🏖️">🏖️ Vacation</option>
+                <option value="💼">💼 Work</option>
+                <option value="🛍️">🛍️ Shopping</option>
+                <option value="📦">📦 Other</option>
+            </select><br><br>
+            <input type="submit" value="Add Entry" id="submitButton">
+        </form>
+    </section>
         
-        <script src="" async defer></script>
-    </body>
+
+    <section id="entries">
+        <h3>Your Budget Entries</h3>
+    </section>
+
+    <section id="total">
+        <h3>Total Expenses</h3>
+        <p id="totalAmount">$0</p>
+    </section>
+    
+    <script>
+        document.getElementById('budgetForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get form values
+            const category = document.getElementById('category').value;
+            const amount = parseInt(document.getElementById('amount').value); // Parse amount as integer
+            const emoji = document.getElementById('emoji').value;
+
+            // Create new entry
+            const entry = document.createElement('div');
+            entry.className = 'budget-entry';
+            entry.innerHTML = `<p>Category: ${emoji} ${category}</p><p>Amount: $${amount}</p>`;
+
+            // Append entry to entries section
+            document.getElementById('entries').appendChild(entry);
+
+            // Calculate total expenses
+            const totalElement = document.getElementById('totalAmount');
+            let totalAmount = parseInt(totalElement.textContent.replace('$', '')); // Parse totalAmount from text
+            totalAmount += amount;
+            totalElement.textContent = `$${totalAmount}`; // Update total amount display
+
+            // Reset the form
+            document.getElementById('budgetForm').reset();
+        });
+    </script>
+</body>
 </html>
