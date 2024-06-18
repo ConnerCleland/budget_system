@@ -7,26 +7,50 @@
     <title>Budget</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static "startingPage.css" %}">
-    <link rel="stylesheet" href="{% static "homeButtons.css" %}">
-    <link rel="stylesheet" href="{% static "registrationPage.css" %}">
-    <link rel="stylesheet" href="{% static "registrationButtons.css" %}">
+    <link rel="stylesheet" href="{% static 'startingPage.css' %}">
+    <link rel="stylesheet" href="{% static 'homeButtons.css' %}">
+    <link rel="stylesheet" href="{% static 'registrationPage.css' %}">
+    <link rel="stylesheet" href="{% static 'registrationButtons.css' %}">
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+        }
+        nav {
+            width: 100%;
+        }
+        header, section {
+            width: 60%;
+            margin: 20px 0;
+        }
+        #entries {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            padding: 0px;
+            overflow-y: auto;
+            background-color: rgb(163, 163, 137);
+        }
         .budget-entry {
-            margin: 0px 600px;
-            padding: 20px;
-            overflow: hidden;
-            border: 2px solid #000;
+            padding: 10px;
             background: linear-gradient(145deg, #e2e2e2, #c4c4c4);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            width: auto;
-            border-radius: 50px;
-            top: 20px;
+            margin-bottom: 0px;
         }
         .budget-entry p {
             margin: 5px 0;
         }
+        #myPieChart {
+            position: relative;
+            top: -450px;
+            right: 260px;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav>
@@ -46,7 +70,7 @@
             <input type="text" id="category" name="category" required><br><br>
             
             <label for="amount">Amount:</label>
-            <input type="number" id="amount" name="amount" required><br><br>
+            <input type="number" id="amount" name="amount" step="0.01" required><br><br>
 
             <label for="emoji">Emoji:</label>
             <select id="emoji" name="emoji" required>
@@ -64,39 +88,91 @@
             <input type="submit" value="Add Entry" id="submitButton">
         </form>
     </section>
-        
 
+    <section id="totalSection">
+        <section id="total">
+            <h3>Total Expenses:</h3>
+            <p id="totalAmount">$0.00</p>
+        </section>
+    </section>
+
+    <section id="userChart">
+        <section id="chartSection">
+            <canvas id="myPieChart"></canvas>
+        </section>
+    </section>
+    
     <section id="entries">
         <h3>Your Budget Entries</h3>
     </section>
-
-    <section id="total">
-        <h3>Total Expenses</h3>
-        <p id="totalAmount">$0</p>
-    </section>
     
     <script>
+        const spendingData = {};
+        const ctx = document.getElementById('myPieChart').getContext('2d');
+        const myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: [],
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#FF5733', '#33FF57', 
+                        '#3357FF', '#8E44AD', '#F39C12', '#D35400', '#C0392B'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                aspectRatio: 1,
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            const label = data.labels[tooltipItem.index] || '';
+                            const value = data.datasets[0].data[tooltipItem.index];
+                            return `${label}: $${value.toFixed(2)}`;
+                        },
+                        afterLabel: function(tooltipItem, data) {
+                            const emoji = data.labels[tooltipItem.index];
+                            return emoji;
+                        }
+                    }
+                }
+            }
+        });
+
         document.getElementById('budgetForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
             // Get form values
             const category = document.getElementById('category').value;
-            const amount = parseInt(document.getElementById('amount').value); // Parse amount as integer
+            const amount = parseFloat(document.getElementById('amount').value); // Parse amount as float
             const emoji = document.getElementById('emoji').value;
 
             // Create new entry
             const entry = document.createElement('div');
             entry.className = 'budget-entry';
-            entry.innerHTML = `<p>Category: ${emoji} ${category}</p><p>Amount: $${amount}</p>`;
-
+            entry.innerHTML = `<p>Category: ${emoji} ${category}</p><p>Amount: $${amount.toFixed(2)}</p>`;
+            
             // Append entry to entries section
             document.getElementById('entries').appendChild(entry);
 
             // Calculate total expenses
             const totalElement = document.getElementById('totalAmount');
-            let totalAmount = parseInt(totalElement.textContent.replace('$', '')); // Parse totalAmount from text
+            let totalAmount = parseFloat(totalElement.textContent.replace('$', '')); // Parse totalAmount from text
             totalAmount += amount;
-            totalElement.textContent = `$${totalAmount}`; // Update total amount display
+            totalElement.textContent = `$${totalAmount.toFixed(2)}`; // Update total amount display with two decimal places
+
+            // Update spending data
+            if (spendingData[emoji]) {
+                spendingData[emoji] += amount;
+            } else {
+                spendingData[emoji] = amount;
+                myPieChart.data.labels.push(emoji);
+            }
+
+            // Update pie chart
+            myPieChart.data.datasets[0].data = myPieChart.data.labels.map(label => spendingData[label]);
+            myPieChart.update();
 
             // Reset the form
             document.getElementById('budgetForm').reset();

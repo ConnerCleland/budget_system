@@ -9,7 +9,7 @@ h1 {
 }
 
 body {
-    background-color: rgb(173, 173, 162); 
+    background-color: rgb(163, 163, 137); 
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
@@ -24,3 +24,24 @@ body {
     font-size: 1.5em;
     font-family: 'Arial', sans-serif;
 }
+#totalSection {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    top: -600px;
+    padding-left: 4px;
+    right: 280px;
+    bottom: 30px;
+    font-size: 1.5em;
+    font-family: 'Arial', sans-serif;
+}
+
+#userEntries {
+    flex-direction: column;
+    position: relative;
+    top: -600px;
+    padding-left: 4px;
+    font-size: 1.5em;
+    font-family: 'Arial', sans-serif;
+}
+
